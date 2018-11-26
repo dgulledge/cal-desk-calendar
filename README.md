@@ -3,7 +3,7 @@ Desk calendar style extensions to Emacs' Calendar/Diary
 
 This is an extension to the existing Emacs Diary display.  It formats the
 entries like a desk calendar.  On a normal desk calendar each row represents
-a fixed amount of time during the day, typically either 15 of 30 minutes or
+a fixed amount of time during the day, typically either 15 or 30 minutes or
 an entire hour.  That's the default if everything fits, but rows with too much
 to fit are expanded, and events that occur at specific times that don't fall
 on the stated boundaries get their own row.  The screenshot below gives some
