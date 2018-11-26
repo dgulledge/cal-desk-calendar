@@ -20,6 +20,4 @@ just load cal-desk-calendar.el and set a couple of hooks:
 There are additional settings for the length of intervals, time for the start
 and end of your normal workday, the time format you prefer, etc.
 
-![screenshot](https://github.com/dgulledge/cal-desk-calendar/edit/master/Emacs-Desk-Calendar-screenshot.png "Emacs Desk Calendar screenshot")
-
-
+![screenshot](/Emacs-Desk-Calendar-screenshot.png "Emacs Desk Calendar screenshot")
