@@ -1,9 +1,9 @@
 ;; cal-desk-calendar.el --- Desk calendar style extensions to Emacs' Calendar/Diary
 
-;; Copyright (C) 1995, 1999, 2008 D. Dale Gulledge.
+;; Copyright (C) 1995, 1999, 2008, 2018 D. Dale Gulledge.
 ;;
 ;; Author: D. Dale Gulledge <dsplat@rochester.rr.com>
-;; Version: 0.8.1 (2008/11/06)
+;; Version: 0.8.2 (2018/11/26)
 ;; Keywords: calendar
 ;; Human-Keywords: desk calendar, diary
 
