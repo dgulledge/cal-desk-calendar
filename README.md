@@ -12,11 +12,11 @@ idea as to how this looks.
 See the comments at the beginning of cal-desk-calendar.el for a detailed
 explanation of the configuration options.  The short version is that you can
 just load cal-desk-calendar.el and set a couple of hooks:
-
-  (load-library "cal-desk-calendar")
-  (add-hook 'diary-display-hook 'sort-diary-entries)
-  (add-hook 'diary-display-hook 'fancy-schedule-display-desk-calendar t)
-
+```
+    (load-library "cal-desk-calendar")
+    (add-hook 'diary-display-hook 'sort-diary-entries)
+    (add-hook 'diary-display-hook 'fancy-schedule-display-desk-calendar t)
+```
 There are additional settings for the length of intervals, time for the start
 and end of your normal workday, the time format you prefer, etc.
 
