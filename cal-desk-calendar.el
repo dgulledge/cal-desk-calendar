@@ -235,8 +235,12 @@ diary entries.")
   "*A string containing the phrase for \"hours of daylight\" in the user\'s
 preferred language.")
 
-(setq calendar-holidays
-  (append general-holidays local-holidays other-holidays solar-holidays))
+(defvar fancy-diary-buffer "Diary Desk Calendar")
+
+(defvar holidays-in-diary-buffer nil)
+
+;;(setq calendar-holidays
+;;  (append general-holidays local-holidays other-holidays solar-holidays))
 
 (defun within-3-month-range (entry)
   "Determine if a date falls within a month either way of the current month."
@@ -252,12 +256,12 @@ The recognized forms are XXXX or X:XX or XX:XX (military time), XXam or XXpm,
 and XX:XXam or XX:XXpm."
   (cond ((string-match;; Military time  
           "^[ 	]*\\([0-9]?[0-9]\\):?\\([0-9][0-9]\\)\\(\\>\\|[^ap]\\)" s)
-         (+ (* 100 (string-to-int
+         (+ (* 100 (string-to-number
                     (substring s (match-beginning 1) (match-end 1))))
-            (string-to-int (substring s (match-beginning 2) (match-end 2)))))
+            (string-to-number (substring s (match-beginning 2) (match-end 2)))))
         ((string-match;; Hour only  XXam or XXpm
           "^[ 	]*\\([0-9]?[0-9]\\)\\([ap]\\)m\\>" s)
-         (+ (* 100 (% (string-to-int
+         (+ (* 100 (% (string-to-number
                          (substring s (match-beginning 1) (match-end 1)))
                         12))
             (if (string-equal "a"
@@ -265,10 +269,10 @@ and XX:XXam or XX:XXpm."
                 0 1200)))
         ((string-match;; Hour and minute  XX:XXam or XX:XXpm
           "^[ 	]*\\([0-9]?[0-9]\\):\\([0-9][0-9]\\)\\([ap]\\)m\\>" s)
-         (+ (* 100 (% (string-to-int
+         (+ (* 100 (% (string-to-number
                          (substring s (match-beginning 1) (match-end 1)))
                         12))
-            (string-to-int (substring s (match-beginning 2) (match-end 2)))
+            (string-to-number (substring s (match-beginning 2) (match-end 2)))
             (if (string-equal "a"
                               (substring s (match-beginning 3) (match-end 3)))
                 0 1200)))
@@ -343,7 +347,7 @@ expressed as integers.  This a a fancy display style based on a desk calendar."
 will appear given a schedule starting time of START and an interval of BY minutes.
 START and TIME are military time expressed as integers."
   (let ((minutes (- (% time 100) (% start 100))))
-    (if (> time 0)
+    (if (>= time 0)
 	(+
 	 1
 	 (*
@@ -376,7 +380,7 @@ are in military time expressed as integers."
     (if (> (% (diary-minutes-since-midnight end) by) 0)
 	(setq end-line (1+ end-line)))
     (cond ((= begin -9999)
-	   (message (setq diary-schedule-out-of-bounds-entry-text
+	   (message "%s" (setq diary-schedule-out-of-bounds-entry-text
 		 (concat diary-schedule-out-of-bounds-entry-text
 			 "\n"
 			 text))))
@@ -536,6 +540,7 @@ are in military time expressed as integers."
 
 (defun display-schedule-entry (start stop by entry-text offset)
   (let ((times (diary-entry-times entry-text)))
+    (message "Times = %S, from \"%s\"" times entry-text)
     (cond ((= (length times) 3)
 	   (diary-display-at start stop by
 			     (car times) (car (cdr times)) (car (cdr (cdr times)))
@@ -587,17 +592,17 @@ elements of the list will contain the time given."
      "^[ 	]*\\([0-9]?[0-9]\\):\\([0-9][0-9]\\)-\\([0-9]?[0-9]\\):\\([0-9][0-9]\\)\\([ap]\\)m\\>"
      s)
     (list
-     (+ (* 100 (% (string-to-int
+     (+ (* 100 (% (string-to-number
 		   (substring s (match-beginning 1) (match-end 1)))
 		  12))
-	(string-to-int (substring s (match-beginning 2) (match-end 2)))
+	(string-to-number (substring s (match-beginning 2) (match-end 2)))
 	(if (string-equal "a"
 			  (substring s (match-beginning 5) (match-end 5)))
 	    0 1200))
-     (+ (* 100 (% (string-to-int
+     (+ (* 100 (% (string-to-number
 		   (substring s (match-beginning 3) (match-end 3)))
 		  12))
-	(string-to-int (substring s (match-beginning 4) (match-end 4)))
+	(string-to-number (substring s (match-beginning 4) (match-end 4)))
 	(if (string-equal "a"
 			  (substring s (match-beginning 5) (match-end 5)))
 	    0 1200))
@@ -608,25 +613,25 @@ elements of the list will contain the time given."
      "^[ 	]*\\([0-9]?[0-9]\\):?\\([0-9][0-9]\\)-\\([0-9]?[0-9]\\):?\\([0-9][0-9]\\)\\(\\|[^ap]\\)"
      s)
     (list
-     (+ (* 100 (string-to-int
+     (+ (* 100 (string-to-number
 	       (substring s (match-beginning 1) (match-end 1))))
-       (string-to-int (substring s (match-beginning 2) (match-end 2))))
-     (+ (* 100 (string-to-int
+       (string-to-number (substring s (match-beginning 2) (match-end 2))))
+     (+ (* 100 (string-to-number
 	       (substring s (match-beginning 3) (match-end 3))))
-       (string-to-int (substring s (match-beginning 4) (match-end 4))))
+       (string-to-number (substring s (match-beginning 4) (match-end 4))))
      (substring s (1+ (match-end 4)))))
 
    ;; Hour range HH[ap]m-HH[ap]m
    ((string-match
      "^[ 	]*\\([0-9]?[0-9]\\)\\([ap]\\)m-\\([0-9]?[0-9]\\)\\([ap]\\)m\\>" s)
     (list
-     (+ (* 100 (% (string-to-int
+     (+ (* 100 (% (string-to-number
 		  (substring s (match-beginning 1) (match-end 1)))
 		 12))
        (if (string-equal "a"
 			 (substring s (match-beginning 2) (match-end 2)))
 	   0 1200))
-     (+ (* 100 (% (string-to-int
+     (+ (* 100 (% (string-to-number
 		  (substring s (match-beginning 3) (match-end 3)))
 		 12))
        (if (string-equal "a"
@@ -638,13 +643,13 @@ elements of the list will contain the time given."
    ((string-match
      "^[ 	]*\\([0-9]?[0-9]\\)-\\([0-9]?[0-9]\\)\\([ap]\\)m\\>" s)
     (list
-     (+ (* 100 (% (string-to-int
+     (+ (* 100 (% (string-to-number
 		  (substring s (match-beginning 1) (match-end 1)))
 		 12))
        (if (string-equal "a"
 			 (substring s (match-beginning 3) (match-end 3)))
 	   0 1200))
-     (+ (* 100 (% (string-to-int
+     (+ (* 100 (% (string-to-number
 		  (substring s (match-beginning 2) (match-end 2)))
 		 12))
        (if (string-equal "a"
@@ -657,17 +662,17 @@ elements of the list will contain the time given."
      "^[ 	]*\\([0-9]?[0-9]\\):\\([0-9][0-9]\\)\\([ap]\\)m-\\([0-9]?[0-9]\\):\\([0-9][0-9]\\)\\([ap]\\)m\\>"
      s)
     (list
-     (+ (* 100 (% (string-to-int
+     (+ (* 100 (% (string-to-number
 		   (substring s (match-beginning 1) (match-end 1)))
 		  12))
-	(string-to-int (substring s (match-beginning 2) (match-end 2)))
+	(string-to-number (substring s (match-beginning 2) (match-end 2)))
 	(if (string-equal "a"
 			  (substring s (match-beginning 3) (match-end 3)))
 	    0 1200))
-     (+ (* 100 (% (string-to-int
+     (+ (* 100 (% (string-to-number
 		   (substring s (match-beginning 4) (match-end 4)))
 		  12))
-	(string-to-int (substring s (match-beginning 5) (match-end 5)))
+	(string-to-number (substring s (match-beginning 5) (match-end 5)))
 	(if (string-equal "a"
 			  (substring s (match-beginning 6) (match-end 6)))
 	    0 1200))
@@ -676,15 +681,15 @@ elements of the list will contain the time given."
    ;; Military time
    ((string-match
      "^[ 	]*\\([0-9]?[0-9]\\):?\\([0-9][0-9]\\)\\(\\>\\|[^ap]\\)" s)
-    (let ((time (+ (* 100 (string-to-int
+    (let ((time (+ (* 100 (string-to-number
 			   (substring s (match-beginning 1) (match-end 1))))
-		   (string-to-int (substring s (match-beginning 2) (match-end 2))))))
+		   (string-to-number (substring s (match-beginning 2) (match-end 2))))))
       (list time time (substring s (1+ (match-end 2))))))
 
    ;; Hour only XXam or XXpm
    ((string-match
      "^[ 	]*\\([0-9]?[0-9]\\)\\([ap]\\)m\\>" s)
-    (let ((time (+ (* 100 (% (string-to-int
+    (let ((time (+ (* 100 (% (string-to-number
 			      (substring s (match-beginning 1) (match-end 1)))
 			     12))
 		   (if (string-equal "a"
@@ -695,10 +700,10 @@ elements of the list will contain the time given."
    ;; Hour and minute XX:XXam or XX:XXpm
    ((string-match
      "^[ 	]*\\([0-9]?[0-9]\\):\\([0-9][0-9]\\)\\([ap]\\)m\\>" s)
-    (let ((time (+ (* 100 (% (string-to-int
+    (let ((time (+ (* 100 (% (string-to-number
 			      (substring s (match-beginning 1) (match-end 1)))
 			     12))
-		   (string-to-int (substring s (match-beginning 2) (match-end 2)))
+		   (string-to-number (substring s (match-beginning 2) (match-end 2)))
 		   (if (string-equal "a"
 				     (substring s (match-beginning 3) (match-end 3)))
 		       0 1200))))
@@ -708,17 +713,17 @@ elements of the list will contain the time given."
    ((string-match
 ;;     "^[ 	]*Sunrise \\([0-9]?[0-9]\\):\\([0-9][0-9]\\)\\([ap]\\)m\\> ([A-Za-z 0-9+-]*), sunset \\([0-9]?[0-9]\\):\\([0-9][0-9]\\)\\([ap]\\)m\\> \\(([A-Za-z 0-9+-]*)\\)"
      diary-schedule-sunrise-sunset-pattern s)
-    (let ((sunrise-time (+ (* 100 (% (string-to-int
+    (let ((sunrise-time (+ (* 100 (% (string-to-number
 				      (substring s (match-beginning 1) (match-end 1)))
 				     12))
-			   (string-to-int (substring s (match-beginning 2) (match-end 2)))
+			   (string-to-number (substring s (match-beginning 2) (match-end 2)))
 			   (if (string-equal "a"
 					     (substring s (match-beginning 3) (match-end 3)))
 			       0 1200)))
-	  (sunset-time (+ (* 100 (% (string-to-int
+	  (sunset-time (+ (* 100 (% (string-to-number
 				     (substring s (match-beginning 5) (match-end 5)))
 				    12))
-			  (string-to-int (substring s (match-beginning 6) (match-end 6)))
+			  (string-to-number (substring s (match-beginning 6) (match-end 6)))
 			  (if (string-equal "a"
 					    (substring s (match-beginning 7) (match-end 7)))
 			      0 1200))))
@@ -743,10 +748,10 @@ elements of the list will contain the time given."
    ((string-match
 ;;     "^[ 	]*\\(New\\|First Quarter\\|Full\\|Last Quarter\\) Moon \\([0-9]?[0-9]\\):\\([0-9][0-9]\\)\\([ap]\\)m\\> ([A-Z0-9+-]*)" s)
      diary-schedule-lunar-phase-pattern s)
-    (let ((time (+ (* 100 (% (string-to-int
+    (let ((time (+ (* 100 (% (string-to-number
 			      (substring s (match-beginning 2) (match-end 2)))
 			     12))
-		   (string-to-int (substring s (match-beginning 3) (match-end 3)))
+		   (string-to-number (substring s (match-beginning 3) (match-end 3)))
 		   (if (string-equal "a"
 				     (substring s (match-beginning 4) (match-end 4)))
 		       0 1200))))
@@ -756,10 +761,10 @@ elements of the list will contain the time given."
    ((string-match
 ;;     "^[ 	]*\\(Vernal Equinox\\|Summer Solstice\\|Autumnal Equinox\\|Winter Solstice\\) \\([0-9]?[0-9]\\):\\([0-9][0-9]\\)\\([ap]\\)m\\> ([A-Z0-9+-]*)" s)
      diary-schedule-equinox-solstice-pattern s)
-    (let ((time  (+ (* 100 (% (string-to-int
+    (let ((time  (+ (* 100 (% (string-to-number
 			      (substring s (match-beginning 2) (match-end 2)))
 			     12))
-		   (string-to-int (substring s (match-beginning 3) (match-end 3)))
+		   (string-to-number (substring s (match-beginning 3) (match-end 3)))
 		   (if (string-equal "a"
 				     (substring s (match-beginning 4) (match-end 4)))
 		       0 1200))))
@@ -768,10 +773,10 @@ elements of the list will contain the time given."
    ;; Daylight Savings Time
    ((string-match
      diary-schedule-daylight-savings-time-pattern s)
-    (let ((time  (+ (* 100 (% (string-to-int
+    (let ((time  (+ (* 100 (% (string-to-number
 			      (substring s (match-beginning 2) (match-end 2)))
 			     12))
-		   (string-to-int (substring s (match-beginning 3) (match-end 3)))
+		   (string-to-number (substring s (match-beginning 3) (match-end 3)))
 		   (if (string-equal "a"
 				     (substring s (match-beginning 4) (match-end 4)))
 		       0 1200))))
